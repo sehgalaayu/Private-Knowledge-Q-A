@@ -219,12 +219,12 @@ async def upload_document(file: UploadFile = File(...)):
         
         # Generate embeddings and create chunk objects
         chunks = []
-        for idx, chunk_text in enumerate(chunks_text):
-            embedding = await get_embedding(chunk_text)
+        for idx, chunk_content in enumerate(chunks_text):
+            embedding = await get_embedding(chunk_content)
             chunk = Chunk(
                 document_id=doc.id,
                 document_name=doc.name,
-                text=chunk_text,
+                text=chunk_content,
                 embedding=embedding,
                 chunk_index=idx
             )
