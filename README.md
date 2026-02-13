@@ -32,7 +32,7 @@ python -m uvicorn server:app --reload --host 0.0.0.0 --port 8001
 ```bash
 cd frontend
 npm install
-npm run dev
+npm start
 ```
 
 The application will be available at `http://localhost:3000`
@@ -59,8 +59,8 @@ The application will be available at `http://localhost:3000`
 ### Document Upload Process
 
 1. User uploads a text file
-2. File is split into ~300-word chunks with overlap
-3. Each chunk is embedded using OpenAI's text-embedding-3-small
+2. File is split into 400-character chunks with 100-character overlap
+3. Each chunk is embedded using `text-embedding-3-small` (configurable)
 4. Chunks and embeddings are stored in MongoDB
 
 ### Question Answering (RAG)
@@ -68,8 +68,8 @@ The application will be available at `http://localhost:3000`
 1. User asks a question
 2. Question is embedded using the same model
 3. Cosine similarity is calculated between question and all chunks
-4. Top 3 most similar chunks are retrieved
-5. Chunks are sent to GPT-4o with strict prompt
+4. Top 10 chunks are selected, then filtered by min_score and adaptive floor
+5. Chunks are sent to the LLM with strict grounding and comparison rules
 6. AI generates answer with source citations
 
 ## 🔐 Environment Variables
@@ -80,7 +80,13 @@ The application will be available at `http://localhost:3000`
 MONGO_URL=mongodb://localhost:27017
 DB_NAME=knowledge_qa
 CORS_ORIGINS=*
-EMERGENT_LLM_KEY=your_key_here
+OPENAI_API_KEY=your_key_here
+OPENAI_BASE_URL=https://openrouter.ai/api/v1
+OPENAI_MODEL=your_chat_model
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_EMBEDDING_BASE_URL=https://openrouter.ai/api/v1
+OPENAI_APP_URL=http://localhost:3000
+OPENAI_APP_NAME=Private Knowledge Q&A
 ```
 
 ### Frontend (.env)
@@ -96,6 +102,7 @@ REACT_APP_BACKEND_URL=http://localhost:8001
 - `POST /api/documents/upload` - Upload a document
 - `GET /api/documents` - List all documents
 - `GET /api/documents/{id}` - Get specific document
+- `DELETE /api/documents/{id}` - Delete a document
 
 ### Q&A
 
@@ -148,4 +155,4 @@ MIT License - feel free to use for personal or commercial projects.
 
 ## 🙏 Credits
 
-Built with modern web technologies and AI-powered by OpenAI.
+Built with modern web technologies and OpenAI-compatible APIs.

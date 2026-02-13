@@ -1,28 +1,146 @@
-# About This Project
+# About Me
 
-## 🎯 Project Overview
+## Aayu Sehgal
 
-**Private Knowledge Q&A** is a full-stack web application that enables users to upload documents and ask questions about them using AI. The system uses Retrieval Augmented Generation (RAG) to provide accurate, source-cited answers from the uploaded documents.
+📍 New Delhi, India
 
-## 👨‍💻 Developer
+📧 sehgalaayu@gmail.com
 
-Built by an AI coding agent (E1 from Emergent Labs) as a demonstration of:
-- Clean, maintainable code architecture
-- Production-ready RAG implementation
-- Premium UI/UX design
-- Comprehensive documentation
+📱 +91-8076904213
 
-## 🏗️ Technical Decisions
+🔗 LinkedIn: https://www.linkedin.com/in/sehgalaayu/
+
+🔗 GitHub: https://github.com/sehgalaayu
+
+---
+
+## Professional Summary
+
+Full Stack MERN Developer with hands-on experience building scalable production applications using React, Node.js, Express.js, and MongoDB. Skilled in API design, database optimization, and writing clean, maintainable code.
+
+Currently seeking full-time backend/full-stack opportunities where I can contribute to impactful products and grow as an engineer.
+
+---
+
+## Technical Skills
+
+### Frontend
+
+- React.js
+- Next.js
+- HTML5
+- CSS3
+- Tailwind CSS
+- JavaScript (ES6+)
+- TypeScript
+
+### Backend
+
+- Node.js
+- Express.js
+- RESTful APIs
+- JWT Authentication
+- bcrypt
+- Middleware Architecture
+
+### Database
+
+- MongoDB
+- Mongoose ORM
+- Schema Design
+- Indexing and Query Optimization
+
+### Tools and Deployment
+
+- Git and GitHub
+- Vercel
+- Render
+- Postman
+- VS Code
+
+---
+
+## Professional Experience
+
+### MERN Stack Intern
+
+Cantab Alpha — UK (Remote)
+
+July 2025 – December 2025
+
+- Built full-stack production features using MERN stack for applications serving 50+ concurrent users
+- Designed RESTful APIs with authentication and validation (JWT)
+- Reduced API response time by 35%
+- Optimized MongoDB schemas and indexing (40% database load reduction)
+- Deployed applications using Vercel and Render
+- Followed secure authentication best practices using bcrypt
+
+---
+
+## Key Projects
+
+### Airbnb Clone
+
+- Full rental marketplace with 50+ listings
+- Advanced search and filtering
+- 200+ user reviews
+- JWT auth + CSRF protection
+- Sub-100ms optimized APIs
+- Cloudinary integration
+
+### Product Feedback Platform
+
+- Role-based access control
+- 100+ feedback posts
+- TypeScript for type safety
+- 90+ Lighthouse performance
+- Deployed scalable backend
+
+### Real-Time Chat Application
+
+- Supports 1,000+ simultaneous connections
+- WebSockets with <100ms latency
+- 10K+ messages/hour handling
+- JWT authentication
+- 99% uptime
+
+---
+
+## Problem Solving and Achievements
+
+- 250+ LeetCode problems solved
+- 250+ GitHub commits
+- 2nd Runner-Up — Bennett University Blockchain Hackathon
+
+---
+
+## Education
+
+B.Tech in Computer Science
+
+Bennett University, Greater Noida
+
+Expected Graduation: June 2026
+
+---
+
+## Project Overview
+
+Private Knowledge Q&A is a full-stack web application that enables users to upload documents and ask questions about them using AI. The system uses Retrieval Augmented Generation (RAG) to provide accurate, source-cited answers from the uploaded documents.
+
+## Technical Decisions
 
 ### Backend: FastAPI + Python
 
 **Why FastAPI?**
+
 - Modern async support (critical for AI API calls)
 - Automatic API documentation (Swagger/OpenAPI)
 - Type safety with Pydantic
 - Fast development and excellent DX
 
 **Why Python?**
+
 - Best ecosystem for AI/ML (NumPy, OpenAI SDK)
 - Readable, maintainable code
 - Strong typing with Pydantic models
@@ -31,18 +149,21 @@ Built by an AI coding agent (E1 from Emergent Labs) as a demonstration of:
 ### Frontend: React + Tailwind
 
 **Why React?**
+
 - Component-based architecture
 - Huge ecosystem and community
 - Easy to maintain and extend
 - Great developer experience
 
 **Why Tailwind CSS?**
+
 - Utility-first approach (faster development)
 - Consistent design system
 - No CSS naming conflicts
 - Easy to customize and extend
 
 **Why Framer Motion?**
+
 - Smooth, professional animations
 - Declarative API (easy to understand)
 - Performance optimized
@@ -51,12 +172,14 @@ Built by an AI coding agent (E1 from Emergent Labs) as a demonstration of:
 ### Database: MongoDB
 
 **Why MongoDB?**
+
 - Flexible schema for documents
 - Native support for large arrays (embeddings)
 - Easy to set up and use
 - Good performance for this use case
 
 **Alternatives considered:**
+
 - PostgreSQL + pgvector: More complex setup, but better for production scale
 - Pinecone: Purpose-built vector DB, but adds external dependency
 - ChromaDB: Good for local dev, less mature for production
@@ -64,10 +187,12 @@ Built by an AI coding agent (E1 from Emergent Labs) as a demonstration of:
 ### AI: OpenAI via emergentintegrations
 
 **Models used:**
+
 - `text-embedding-3-small`: Cost-effective, fast embeddings
 - `gpt-4o`: High-quality text generation, good speed/cost balance
 
 **Why emergentintegrations?**
+
 - Universal key support (easy for users)
 - Consistent API across providers
 - Built-in rate limiting and error handling
@@ -77,17 +202,20 @@ Built by an AI coding agent (E1 from Emergent Labs) as a demonstration of:
 ### "Deep Space Vault" Aesthetic
 
 **Inspiration:**
+
 - Linear (clean, modern, professional)
 - Notion (functional, minimal)
 - Vercel (elegant, premium)
 
 **Color Palette:**
+
 - Background: Deep space black (#02040A)
 - Primary: Electric blue (#3B82F6)
 - Accents: Subtle purples and teals
 - Text: High contrast whites and grays
 
 **Key Design Elements:**
+
 1. **Glassmorphism**: Frosted glass cards with backdrop blur
 2. **Neon Glows**: Subtle glow effects on interactive elements
 3. **Smooth Animations**: Every interaction feels responsive
@@ -95,6 +223,7 @@ Built by an AI coding agent (E1 from Emergent Labs) as a demonstration of:
 5. **Dark Mode First**: Optimized for focus and reduced eye strain
 
 **Why Premium UI Matters:**
+
 - Builds trust ("this looks professional")
 - Improves UX (clear, intuitive interactions)
 - Differentiates from basic AI demos
@@ -107,18 +236,21 @@ Built by an AI coding agent (E1 from Emergent Labs) as a demonstration of:
 **Approach: Simple & Effective**
 
 Instead of over-engineering with:
+
 - Complex vector databases
 - Multiple reranking stages
 - Query expansion pipelines
 - Hybrid search systems
 
 We chose:
+
 - **In-memory similarity search**: Fast enough for < 10K chunks
 - **Top-3 retrieval**: Balance between context and focus
 - **Single-stage ranking**: Cosine similarity is sufficient
 - **No query expansion**: Adds complexity, marginal gains
 
 **Why this works:**
+
 - 95% of use cases have < 100 documents
 - Response time < 2 seconds is acceptable
 - Easier to debug and maintain
@@ -129,17 +261,20 @@ We chose:
 **300 words with 50-word overlap**
 
 **Why 300 words?**
+
 - Research shows: optimal for embedding quality
 - Large enough: captures complete thoughts
 - Small enough: precise retrieval
 - Token efficient: ~400 tokens per chunk
 
 **Why 50-word overlap?**
+
 - Prevents context fragmentation
 - Improves boundary retrieval
 - Minimal storage overhead (17% increase)
 
 **Alternatives considered:**
+
 - Sentence-based: Too granular, loses context
 - Paragraph-based: Too variable in size
 - Fixed token count: Splits mid-sentence
@@ -157,6 +292,7 @@ GET  /api/health            # Health check
 ```
 
 **Design principles:**
+
 - Predictable URLs (standard REST patterns)
 - Verb-noun clarity (upload, ask, get)
 - Version-ready (can add /v2 later)
@@ -167,6 +303,7 @@ GET  /api/health            # Health check
 ### Current Implementation
 
 **What's secure:**
+
 - CORS properly configured
 - Environment variables for secrets
 - No API keys in client code
@@ -174,6 +311,7 @@ GET  /api/health            # Health check
 - Input validation on all endpoints
 
 **What's not implemented (MVP):**
+
 - User authentication
 - Document access control
 - Rate limiting
@@ -196,6 +334,7 @@ Before deploying to production, add:
 ## 📈 Scalability Path
 
 ### Current Capacity
+
 - **Documents**: < 1,000
 - **Chunks**: < 10,000
 - **Concurrent users**: ~10
@@ -204,6 +343,7 @@ Before deploying to production, add:
 ### Scale to 10x (10K docs, 100K chunks)
 
 **Optimizations needed:**
+
 1. Vector database (Pinecone, Weaviate)
 2. Chunk caching (Redis)
 3. Load balancing (multiple FastAPI instances)
@@ -213,6 +353,7 @@ Before deploying to production, add:
 ### Scale to 100x (100K docs, 1M chunks)
 
 **Architecture changes:**
+
 1. Distributed vector search
 2. Sharded MongoDB
 3. Kubernetes orchestration
@@ -222,12 +363,14 @@ Before deploying to production, add:
 ## 🧪 Testing Strategy
 
 ### What's tested:
+
 - API endpoints (unit tests)
 - UI components (component tests)
 - End-to-end flows (E2E tests)
 - Error handling
 
 ### Test coverage goals:
+
 - Backend: > 80%
 - Frontend: > 70%
 - Critical paths: 100%
@@ -237,15 +380,18 @@ Before deploying to production, add:
 If you want to understand the concepts used:
 
 **RAG & Embeddings:**
+
 - [OpenAI Embeddings Guide](https://platform.openai.com/docs/guides/embeddings)
 - [RAG Paper (Lewis et al.)](https://arxiv.org/abs/2005.11401)
 - [LangChain RAG Tutorial](https://python.langchain.com/docs/use_cases/question_answering/)
 
 **FastAPI:**
+
 - [Official Tutorial](https://fastapi.tiangolo.com/tutorial/)
 - [Real Python Guide](https://realpython.com/fastapi-python-web-apis/)
 
 **React + Framer Motion:**
+
 - [React Docs](https://react.dev)
 - [Framer Motion Docs](https://www.framer.com/motion/)
 - [Tailwind CSS](https://tailwindcss.com/docs)
@@ -264,6 +410,7 @@ This is a demo project, but if you want to extend it:
 ## 📞 Support
 
 For questions or issues:
+
 - Check the documentation files (README, AI_NOTES, PROMPTS_USED)
 - Review the code comments (extensively documented)
 - Open an issue on GitHub
@@ -271,6 +418,7 @@ For questions or issues:
 ## 🎓 Educational Value
 
 This project demonstrates:
+
 - ✅ Production-ready code structure
 - ✅ Clean architecture (separation of concerns)
 - ✅ Comprehensive documentation
@@ -281,6 +429,7 @@ This project demonstrates:
 - ✅ Testing approaches
 
 **Ideal for:**
+
 - Learning full-stack development
 - Understanding RAG systems
 - Studying AI application architecture
@@ -290,6 +439,7 @@ This project demonstrates:
 ## 💡 Future Enhancements
 
 **v2.0 Roadmap:**
+
 1. Multi-user support with authentication
 2. Document collections/folders
 3. Question history and saved answers
@@ -300,6 +450,7 @@ This project demonstrates:
 8. Analytics dashboard
 
 **v3.0 Vision:**
+
 1. Multi-modal support (PDFs, images, audio)
 2. Real-time collaboration
 3. Custom AI model fine-tuning

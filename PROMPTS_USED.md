@@ -6,7 +6,7 @@ This document contains all AI prompts used in the application for transparency a
 
 **Location**: `backend/server.py` → `ask_question()` function
 
-**Model**: GPT-4o (via emergentintegrations)
+**Model**: Configurable via `OPENAI_MODEL` (OpenAI-compatible API)
 
 **Purpose**: Instruct the LLM to answer questions based strictly on provided context.
 
@@ -16,10 +16,15 @@ This document contains all AI prompts used in the application for transparency a
 You are a helpful AI assistant that answers questions based ONLY on the provided context.
 
 IMPORTANT RULES:
-1. Answer ONLY using information from the context provided
-2. If the context doesn't contain enough information to answer the question, respond with: "I don't have enough information in the uploaded documents to answer this question."
-3. Be concise and accurate
-4. Cite which source you're using when relevant
+1. Base your answer ONLY on the retrieved context. If multiple sources are present, consider all before answering.
+2. When multiple documents are retrieved and the question asks for comparison, explicitly compare information from EACH document.
+3. Do NOT assume missing information if context from both documents is present.
+4. If both documents contain refund policy details, extract and compare both.
+5. If a document truly has no relevant info, explicitly verify before stating it.
+6. If the context doesn't contain enough information to answer the question, respond with: "I don't have enough information in the uploaded documents to answer this question."
+7. Return STRICT JSON only, with this shape:
+	{"answer": string, "sources": [{"documentName": string, "snippet": string}]}
+8. Do not include markdown, code fences, or extra keys
 ```
 
 **Design Rationale:**
@@ -34,20 +39,20 @@ IMPORTANT RULES:
 ```
 Context from documents:
 
-[Source 1: {document_name_1}]
+--- Document: {document_name_1}
 {chunk_text_1}
 
-[Source 2: {document_name_2}]
+--- Document: {document_name_2}
 {chunk_text_2}
 
-[Source 3: {document_name_3}]
+--- Document: {document_name_3}
 {chunk_text_3}
 
 ---
 
 Question: {user_question}
 
-Answer:
+Return JSON only.
 ```
 
 **Design Rationale:**
@@ -61,6 +66,7 @@ Answer:
 ### Example 1: Successful Retrieval
 
 **Context:**
+
 ```
 [Source 1: company_policy.txt]
 Employees are entitled to 15 days of paid vacation per year. Vacation days must be requested at least 2 weeks in advance through the HR portal.
@@ -79,6 +85,7 @@ Remote work is allowed up to 2 days per week with manager approval. Employees mu
 ### Example 2: Insufficient Information
 
 **Context:**
+
 ```
 [Source 1: product_specs.txt]
 The device weighs 2.5 pounds and measures 10 inches diagonally. It has a battery life of up to 8 hours.
@@ -97,6 +104,7 @@ The device comes with a 1-year limited warranty covering manufacturing defects.
 ### Example 3: Multi-source Answer
 
 **Context:**
+
 ```
 [Source 1: sales_data_q1.txt]
 Q1 revenue was $2.5M, representing a 15% increase from Q4 of the previous year.
@@ -115,11 +123,13 @@ The company achieved total revenue of $10.2M for the fiscal year, with consisten
 ## 3. Prompt Engineering Principles Applied
 
 ### Principle 1: Clear Instructions
+
 - Use imperative language: "Answer ONLY", "Be concise"
 - Provide explicit rules rather than examples
 - Specify exact fallback behavior
 
 ### Principle 2: Context Formatting
+
 - Structured layout with clear delimiters
 - Source attribution in every chunk
 - Separation between context and question
@@ -127,18 +137,18 @@ The company achieved total revenue of $10.2M for the fiscal year, with consisten
 ### Principle 3: Temperature Settings
 
 ```python
-# Default temperature for emergentintegrations
-temperature = 0.7  # Balance between creativity and consistency
+temperature = 0.2  # Lower creativity for grounded Q&A
 ```
 
 **Rationale:**
+
 - Not 0.0: Allows some natural language variation
 - Not 1.0: Maintains consistency and reduces hallucination
 - 0.7: Sweet spot for factual Q&A tasks
 
 ### Principle 4: Token Limits
 
-**Context tokens**: ~900 words × 1.3 tokens/word ≈ 1,170 tokens
+**Context tokens**: variable based on retrieved chunks
 **Question tokens**: ~50 tokens (average)
 **System prompt tokens**: ~100 tokens
 **Max output tokens**: ~500 tokens
@@ -150,18 +160,21 @@ temperature = 0.7  # Balance between creativity and consistency
 ## 4. Prompt Versioning
 
 ### v1.0 (Current)
-- Initial implementation
+
 - Strict grounding rules
-- Source attribution
+- Multi-document comparison guidance
+- JSON-only response requirement
 
 ### Future Iterations
 
 **v1.1** (Planned):
+
 - Add confidence scoring: "I'm highly/moderately confident..."
 - Request bullet points for multi-part answers
 - Add follow-up question suggestions
 
 **v1.2** (Planned):
+
 - Support for comparative questions
 - Highlight contradictions in sources
 - Summarization for long answers
@@ -171,14 +184,17 @@ temperature = 0.7  # Balance between creativity and consistency
 Use these test questions to validate prompt behavior:
 
 ### Grounding Tests
+
 1. "What is the capital of France?" (Should refuse if not in docs)
 2. "Tell me about quantum physics" (Should refuse if not in docs)
 
 ### Retrieval Tests
+
 1. "What does the document say about X?" (Should cite specific source)
 2. "Summarize the main points" (Should synthesize from multiple chunks)
 
 ### Edge Cases
+
 1. "" (Empty question - should be caught before LLM)
 2. "asdfghjkl" (Nonsense - should return insufficient info)
 3. Very long question (Should still work with truncation)
@@ -186,12 +202,14 @@ Use these test questions to validate prompt behavior:
 ## 6. Prompt Monitoring
 
 **Metrics to track:**
+
 - % of "insufficient information" responses
 - Average response length
 - Source citation rate
 - User satisfaction scores
 
 **Red flags:**
+
 - > 50% insufficient info responses → Poor document coverage or retrieval
 - No source citations → Prompt not being followed
 - Very short answers → Context not being used
@@ -200,16 +218,19 @@ Use these test questions to validate prompt behavior:
 ## 7. Ethical Considerations
 
 ### Bias Mitigation
+
 - Instruct to "be objective and balanced"
 - Acknowledge uncertainty when sources conflict
 - Avoid injecting personal opinions
 
 ### Safety
+
 - Refuse to answer harmful queries (handled by OpenAI moderation)
 - Don't generate sensitive PII not in documents
 - Maintain context boundaries (no cross-session info leakage)
 
 ### Privacy
+
 - All data stays in user's private database
 - No logging of document contents to third parties
 - LLM API calls are ephemeral (not stored by provider beyond moderation)

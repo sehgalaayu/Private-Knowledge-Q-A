@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Activity, Database, Server, CheckCircle, XCircle } from 'lucide-react';
-import { GlassCard } from '@/components/GlassCard';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Activity, Database, Server, CheckCircle, XCircle } from "lucide-react";
+import { GlassCard } from "@/components/GlassCard";
+import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -22,29 +22,35 @@ export const StatusPage = () => {
       const response = await axios.get(`${API}/health`);
       setHealth(response.data);
     } catch (error) {
-      console.error('Health check failed:', error);
-      setHealth({ status: 'error', database: 'disconnected', documents_count: 0, chunks_count: 0 });
+      console.error("Health check failed:", error);
+      setHealth({
+        status: "error",
+        database: "disconnected",
+        llm: "disconnected",
+        documents_count: 0,
+        chunks_count: 0,
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const isHealthy = health?.status === 'healthy';
+  const isHealthy = health?.status === "healthy";
 
   const indicators = [
     {
-      name: 'API Server',
-      status: isHealthy ? 'operational' : 'error',
+      name: "API Server",
+      status: isHealthy ? "operational" : "error",
       icon: Server,
     },
     {
-      name: 'Database',
-      status: health?.database === 'connected' ? 'operational' : 'error',
+      name: "Database",
+      status: health?.database === "connected" ? "operational" : "error",
       icon: Database,
     },
     {
-      name: 'AI Service',
-      status: isHealthy ? 'operational' : 'unknown',
+      name: "AI Service",
+      status: health?.llm === "connected" ? "operational" : "error",
       icon: Activity,
     },
   ];
@@ -80,9 +86,11 @@ export const StatusPage = () => {
       <GlassCard className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className={`p-4 rounded-full ${
-              isHealthy ? 'bg-green-500/10' : 'bg-red-500/10'
-            }`}>
+            <div
+              className={`p-4 rounded-full ${
+                isHealthy ? "bg-green-500/10" : "bg-red-500/10"
+              }`}
+            >
               {isHealthy ? (
                 <CheckCircle className="w-8 h-8 text-green-400" />
               ) : (
@@ -91,7 +99,9 @@ export const StatusPage = () => {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-foreground">
-                {isHealthy ? 'All Systems Operational' : 'System Issues Detected'}
+                {isHealthy
+                  ? "All Systems Operational"
+                  : "System Issues Detected"}
               </h2>
               <p className="text-muted-foreground">
                 Last checked: {new Date().toLocaleTimeString()}
@@ -112,8 +122,8 @@ export const StatusPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {indicators.map((indicator, index) => {
           const Icon = indicator.icon;
-          const isOperational = indicator.status === 'operational';
-          
+          const isOperational = indicator.status === "operational";
+
           return (
             <motion.div
               key={indicator.name}
@@ -121,20 +131,30 @@ export const StatusPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <GlassCard data-testid={`status-indicator-${indicator.name.toLowerCase().replace(' ', '-')}`}>
+              <GlassCard
+                data-testid={`status-indicator-${indicator.name.toLowerCase().replace(" ", "-")}`}
+              >
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-lg ${
-                    isOperational ? 'bg-green-500/10' : 'bg-red-500/10'
-                  }`}>
-                    <Icon className={`w-6 h-6 ${
-                      isOperational ? 'text-green-400' : 'text-red-400'
-                    }`} />
+                  <div
+                    className={`p-3 rounded-lg ${
+                      isOperational ? "bg-green-500/10" : "bg-red-500/10"
+                    }`}
+                  >
+                    <Icon
+                      className={`w-6 h-6 ${
+                        isOperational ? "text-green-400" : "text-red-400"
+                      }`}
+                    />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{indicator.name}</p>
-                    <p className={`text-lg font-semibold ${
-                      isOperational ? 'text-green-400' : 'text-red-400'
-                    }`}>
+                    <p className="text-sm text-muted-foreground">
+                      {indicator.name}
+                    </p>
+                    <p
+                      className={`text-lg font-semibold ${
+                        isOperational ? "text-green-400" : "text-red-400"
+                      }`}
+                    >
                       {indicator.status}
                     </p>
                   </div>
@@ -147,15 +167,23 @@ export const StatusPage = () => {
 
       {/* Statistics */}
       <GlassCard>
-        <h3 className="text-xl font-semibold text-foreground mb-4">Statistics</h3>
+        <h3 className="text-xl font-semibold text-foreground mb-4">
+          Statistics
+        </h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="p-4 rounded-lg bg-muted/30">
             <p className="text-sm text-muted-foreground mb-1">Documents</p>
-            <p className="text-3xl font-bold text-foreground">{health?.documents_count || 0}</p>
+            <p className="text-3xl font-bold text-foreground">
+              {health?.documents_count || 0}
+            </p>
           </div>
           <div className="p-4 rounded-lg bg-muted/30">
-            <p className="text-sm text-muted-foreground mb-1">Knowledge Chunks</p>
-            <p className="text-3xl font-bold text-foreground">{health?.chunks_count || 0}</p>
+            <p className="text-sm text-muted-foreground mb-1">
+              Knowledge Chunks
+            </p>
+            <p className="text-3xl font-bold text-foreground">
+              {health?.chunks_count || 0}
+            </p>
           </div>
         </div>
       </GlassCard>

@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, FileText, CheckCircle, X } from 'lucide-react';
-import { GlassCard } from '@/components/GlassCard';
-import { GlowButton } from '@/components/GlowButton';
-import axios from 'axios';
-import { toast } from 'sonner';
+import { useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { UploadCloud, FileText, CheckCircle, X } from "lucide-react";
+import { GlassCard } from "@/components/GlassCard";
+import { GlowButton } from "@/components/GlowButton";
+import axios from "axios";
+import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -14,6 +14,14 @@ export const UploadPage = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const isAllowedTextFile = (candidate) => {
+    if (!candidate) return false;
+    const name = candidate.name || "";
+    const type = candidate.type || "";
+    return type === "text/plain" || name.toLowerCase().endsWith(".txt");
+  };
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -28,22 +36,28 @@ export const UploadPage = () => {
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && droppedFile.type === 'text/plain') {
+    if (isAllowedTextFile(droppedFile)) {
       setFile(droppedFile);
       setUploadSuccess(false);
-    } else {
-      toast.error('Please upload a .txt file');
+      return;
     }
+
+    toast.error("Please upload a .txt file");
   }, []);
 
   const handleFileSelect = (e) => {
     const selectedFile = e.target.files[0];
-    if (selectedFile) {
+    if (!selectedFile) return;
+
+    if (isAllowedTextFile(selectedFile)) {
       setFile(selectedFile);
       setUploadSuccess(false);
+      return;
     }
+
+    toast.error("Please upload a .txt file");
   };
 
   const handleUpload = async () => {
@@ -51,26 +65,28 @@ export const UploadPage = () => {
 
     setUploading(true);
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     try {
       const response = await axios.post(`${API}/documents/upload`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      toast.success(`Document uploaded! ${response.data.chunk_count} chunks created.`);
+      toast.success(
+        `Document uploaded! ${response.data.chunk_count} chunks created.`,
+      );
       setUploadSuccess(true);
-      
+
       // Reset after 2 seconds
       setTimeout(() => {
         setFile(null);
         setUploadSuccess(false);
       }, 2000);
     } catch (error) {
-      console.error('Upload error:', error);
-      toast.error(error.response?.data?.detail || 'Upload failed');
+      console.error("Upload error:", error);
+      toast.error(error.response?.data?.detail || "Upload failed");
     } finally {
       setUploading(false);
     }
@@ -105,7 +121,9 @@ export const UploadPage = () => {
           onDrop={handleDrop}
           animate={{
             scale: isDragging ? 1.02 : 1,
-            borderColor: isDragging ? 'rgba(59, 130, 246, 0.5)' : 'rgba(255, 255, 255, 0.1)',
+            borderColor: isDragging
+              ? "rgba(59, 130, 246, 0.5)"
+              : "rgba(255, 255, 255, 0.1)",
           }}
           className="border-2 border-dashed rounded-xl p-12 text-center transition-all"
           data-testid="upload-dropzone"
@@ -132,12 +150,16 @@ export const UploadPage = () => {
                   className="hidden"
                   id="file-input"
                   data-testid="file-input"
+                  ref={fileInputRef}
                 />
-                <label htmlFor="file-input">
-                  <GlowButton as="span" className="cursor-pointer" data-testid="browse-button">
-                    Browse Files
-                  </GlowButton>
-                </label>
+                <GlowButton
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="cursor-pointer"
+                  data-testid="browse-button"
+                >
+                  Browse Files
+                </GlowButton>
               </motion.div>
             ) : (
               <motion.div
@@ -155,7 +177,9 @@ export const UploadPage = () => {
                     )}
                   </div>
                   <div className="text-left">
-                    <p className="font-semibold text-foreground text-lg">{file.name}</p>
+                    <p className="font-semibold text-foreground text-lg">
+                      {file.name}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {(file.size / 1024).toFixed(2)} KB
                     </p>
@@ -170,14 +194,14 @@ export const UploadPage = () => {
                     </button>
                   )}
                 </div>
-                
+
                 {!uploadSuccess && (
                   <GlowButton
                     onClick={handleUpload}
                     disabled={uploading}
                     data-testid="upload-button"
                   >
-                    {uploading ? 'Processing...' : 'Upload & Process'}
+                    {uploading ? "Processing..." : "Upload & Process"}
                   </GlowButton>
                 )}
               </motion.div>
@@ -188,8 +212,9 @@ export const UploadPage = () => {
         {/* Info */}
         <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/10">
           <p className="text-sm text-muted-foreground">
-            <span className="font-semibold text-primary">How it works:</span> Your document will be split into chunks, 
-            embedded using AI, and stored securely. You can then ask questions about the content.
+            <span className="font-semibold text-primary">How it works:</span>{" "}
+            Your document will be split into chunks, embedded using AI, and
+            stored securely. You can then ask questions about the content.
           </p>
         </div>
       </GlassCard>

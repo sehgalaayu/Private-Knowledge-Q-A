@@ -11,54 +11,57 @@ This application implements a simple but effective RAG system for document-based
 **Function**: `chunk_text()` in `backend/server.py`
 
 ```python
-def chunk_text(text: str, chunk_size: int = 300, overlap: int = 50) -> List[str]:
-    """
-    Split text into chunks with overlap.
-    
-    - chunk_size: 300 words (balance between context and granularity)
-    - overlap: 50 words (preserve context across boundaries)
-    """
+def chunk_text(text: str, chunk_size: int = 400, overlap: int = 100) -> List[str]:
+   """
+   Split text into chunks with overlap and section awareness.
+
+   - chunk_size: 400 characters (tight semantic focus)
+   - overlap: 100 characters (preserve boundary context)
+   """
 ```
 
-**Why 300 words?**
-- Large enough to contain meaningful context
-- Small enough for precise relevance matching
-- Optimal for embedding model performance
+**Why 400 characters?**
 
-**Why 50-word overlap?**
+- Reduces topic mixing inside a chunk
+- Keeps retrieval precise while retaining enough context
+- Easier to control overlap consistently
+
+**Why 100-character overlap?**
+
 - Prevents important context from being split
 - Improves retrieval accuracy at chunk boundaries
 - Minimal storage overhead
 
+**Section-aware splitting**
+
+- Chunking runs per detected section header (e.g., `# Header`, `SECTION:`)
+- Avoids merging unrelated sections into the same chunk
+
 ### Embedding Generation
 
-**Model**: OpenAI `text-embedding-3-small`
+**Model**: OpenAI-compatible embeddings, default `text-embedding-3-small`
 
 **Function**: `get_embedding()` in `backend/server.py`
 
 ```python
 async def get_embedding(text: str) -> List[float]:
-    """
-    Generates 1536-dimensional embedding vectors.
-    
-    Current implementation uses hash-based demo embeddings.
-    In production, replace with actual OpenAI API call:
-    
-    from openai import AsyncOpenAI
-    client = AsyncOpenAI(api_key=EMERGENT_KEY)
-    response = await client.embeddings.create(
-        input=text,
-        model="text-embedding-3-small"
-    )
-    return response.data[0].embedding
-    """
+   """
+   Generates embedding vectors using a consistent model for
+   both documents and queries.
+   """
 ```
 
 **Why text-embedding-3-small?**
-- Cost-effective ($0.02 per 1M tokens)
-- Fast inference time
-- High-quality embeddings for English text
+
+- Cost-effective and fast
+- Strong quality for general English
 - 1536 dimensions (good balance)
+
+**Consistency requirement**
+
+- Documents and queries must use the same embedding model
+- The embedding base URL can be configured separately if the LLM provider
+  does not support embeddings
 
 ### Similarity Search
 
@@ -70,14 +73,14 @@ async def get_embedding(text: str) -> List[float]:
 def cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
     """
     Cosine similarity formula:
-    
+
     similarity = (A · B) / (||A|| * ||B||)
-    
+
     Where:
     - A · B = dot product
     - ||A|| = magnitude of vector A
     - ||B|| = magnitude of vector B
-    
+
     Returns value between -1 and 1:
     - 1 = identical direction
     - 0 = orthogonal (unrelated)
@@ -86,49 +89,64 @@ def cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
 ```
 
 **Why cosine similarity?**
+
 - Direction matters more than magnitude for semantic similarity
 - Normalized comparison (scale-independent)
 - Fast to compute with NumPy
 - Industry standard for text embeddings
 
+**Why normalize to [0, 1]?**
+
+- Raw cosine is in [-1, 1] which is less intuitive for thresholds and UI
+- Normalized scores make filtering and confidence thresholds consistent
+
 **Alternative approaches considered:**
+
 - Euclidean distance: Sensitive to magnitude, not ideal for embeddings
 - Dot product: Not normalized, biased by vector length
 - Jaccard similarity: Works on sets, not suitable for dense vectors
 
 ### Retrieval Strategy
 
-**Top-K Selection**: K = 3
+**Top-K Selection**: K = 10 (then filtered)
 
 ```python
-# Sort by similarity and get top 3
+# Sort by similarity, keep top 10, then filter by adaptive threshold
 chunk_scores.sort(key=lambda x: x['score'], reverse=True)
-top_chunks = chunk_scores[:3]
+top_k_candidates = chunk_scores[:10]
+adaptive_floor = max(min_score, top_similarity - 0.15)
+filtered = [c for c in top_k_candidates if c['score'] >= adaptive_floor]
 ```
 
-**Why top 3?**
-- Provides sufficient context without overwhelming the LLM
-- Keeps token count manageable (~900 words max)
-- Allows for diverse perspectives on the topic
-- Balances precision vs. recall
+**Why top 10 + adaptive floor?**
+
+- Keeps enough candidates for comparison queries
+- Adaptive floor reduces irrelevant chunks per query
+- Preserves precision without manual tuning per document set
 
 ### LLM Prompt Design
 
-**Model**: GPT-4o (via emergentintegrations)
+**Model**: Configurable via `OPENAI_MODEL` (OpenAI-compatible API)
 
 ```python
 system_message = """
 You are a helpful AI assistant that answers questions based ONLY on the provided context.
 
 IMPORTANT RULES:
-1. Answer ONLY using information from the context provided
-2. If the context doesn't contain enough information, say: "I don't have enough information..."
-3. Be concise and accurate
-4. Cite which source you're using when relevant
+1. Base your answer ONLY on the retrieved context. If multiple sources are present, consider all before answering.
+2. When multiple documents are retrieved and the question asks for comparison, explicitly compare information from EACH document.
+3. Do NOT assume missing information if context from both documents is present.
+4. If both documents contain refund policy details, extract and compare both.
+5. If a document truly has no relevant info, explicitly verify before stating it.
+6. If the context doesn't contain enough information to answer the question, respond with: "I don't have enough information in the uploaded documents to answer this question."
+7. Return STRICT JSON only, with this shape:
+   {"answer": string, "sources": [{"documentName": string, "snippet": string}]}
+8. Do not include markdown, code fences, or extra keys
 """
 ```
 
 **Why this prompt structure?**
+
 - **Strict grounding**: Prevents hallucination
 - **Fallback behavior**: Honest about limitations
 - **Source attribution**: Builds trust
@@ -139,6 +157,7 @@ IMPORTANT RULES:
 **MongoDB Collections:**
 
 1. **documents**
+
 ```json
 {
   "id": "uuid",
@@ -150,6 +169,7 @@ IMPORTANT RULES:
 ```
 
 2. **chunks**
+
 ```json
 {
   "id": "uuid",
@@ -162,12 +182,14 @@ IMPORTANT RULES:
 ```
 
 **Why MongoDB?**
+
 - Schema flexibility for embeddings
 - Good performance for document storage
 - Easy to scale horizontally
 - Native support for large arrays
 
 **Note**: For production at scale, consider:
+
 - **Pinecone**: Purpose-built vector database
 - **Weaviate**: Open-source vector search
 - **Milvus**: High-performance similarity search
@@ -175,11 +197,13 @@ IMPORTANT RULES:
 ### Performance Considerations
 
 **Current Implementation:**
+
 - All chunks loaded into memory for similarity search
 - Linear scan through all embeddings
 - Time complexity: O(n) where n = total chunks
 
 **Acceptable for:**
+
 - < 1,000 documents
 - < 10,000 chunks
 - Response time: < 2 seconds
@@ -226,6 +250,7 @@ IMPORTANT RULES:
 ### Monitoring & Observability
 
 **Metrics to track:**
+
 - Average query latency
 - Embedding generation time
 - Top-K retrieval accuracy
@@ -233,10 +258,40 @@ IMPORTANT RULES:
 - User satisfaction (thumbs up/down)
 
 **Logs to capture:**
+
 - Similarity scores for debugging
 - Retrieved chunk indices
 - Full prompts sent to LLM
 - Error stack traces
+
+### AI Assistance and Human Review
+
+**AI-assisted**
+
+- Drafting retrieval pipeline refactors (thresholding, top-k selection)
+- Logging improvements and configuration scaffolding
+- UI adjustments for source display and document deletion
+
+**Manually reviewed and validated**
+
+- Cosine similarity formula and normalization behavior
+- Retrieval thresholds and confidence banding
+- Chunking strategy decisions (size, overlap, section boundaries)
+- API behavior for insufficient-context responses
+
+### Known Limitations
+
+1. **Linear scan over all chunks**
+   - O(n) similarity checks; performance degrades with large corpora
+
+2. **Threshold tuning is heuristic**
+   - Precision/recall tradeoffs require ongoing calibration
+
+3. **No offline evaluation harness**
+   - Retrieval quality is not yet measured against labeled queries
+
+4. **External dependency on embedding/LLM providers**
+   - Availability and latency depend on third-party APIs
 
 ### Future Improvements
 
