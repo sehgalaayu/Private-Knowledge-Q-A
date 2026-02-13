@@ -31,8 +31,8 @@ python -m uvicorn server:app --reload --host 0.0.0.0 --port 8001
 
 ```bash
 cd frontend
-npm install
-npm start
+yarn install
+yarn start
 ```
 
 The application will be available at `http://localhost:3000`
@@ -46,7 +46,7 @@ The application will be available at `http://localhost:3000`
 - **OpenAI API**: Embeddings and text generation
 - **NumPy**: Cosine similarity calculations
 
-### Frontend (React + TypeScript)
+### Frontend (React)
 
 - **React**: UI framework
 - **Framer Motion**: Smooth animations
@@ -68,7 +68,7 @@ The application will be available at `http://localhost:3000`
 1. User asks a question
 2. Question is embedded using the same model
 3. Cosine similarity is calculated between question and all chunks
-4. Top 10 chunks are selected, then filtered by min_score and adaptive floor
+4. Top 10 chunks are selected, then filtered by min_score (0.40)
 5. Chunks are sent to the LLM with strict grounding and comparison rules
 6. AI generates answer with source citations
 
@@ -110,7 +110,7 @@ REACT_APP_BACKEND_URL=http://localhost:8001
 
 ### Health
 
-- `GET /api/health` - System health check
+- `GET /api/health` - System health check (backend, database, LLM)
 
 ## 🎨 UI Components
 
@@ -129,17 +129,7 @@ REACT_APP_BACKEND_URL=http://localhost:8001
 
 ## 🧪 Testing
 
-Run the testing suite to verify all functionality:
-
-```bash
-# Backend tests
-cd backend
-pytest
-
-# Frontend tests
-cd frontend
-npm test
-```
+Testing is not configured in this repo.
 
 ## 🚢 Deployment
 
